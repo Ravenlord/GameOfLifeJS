@@ -11,10 +11,15 @@
 
 /**
  * Cell class.
+ * @param {Number} x
+ *   The x-Position of the cell.
+ * @param {Number} y
+ *   The y-Position of the cell.
  * @returns object
  *   An object reprensenting a cell on the field.
  */
-Cell = function(){
+Cell = function(x, y){
+  if(isNaN(parseInt(x)) || isNaN(parseInt(y))) return undefined;
   return {
     STATE_DEAD: 0,
     STATE_DYING: 1,
@@ -23,11 +28,22 @@ Cell = function(){
     neighbors: new Array(8),
     aliveNeighbors: 0,
     state: 0,
+    _elementId: '#' + y + '-' + x,
     isAlive: function() {
       if(this.state === this.STATE_ALIVE){
         return true;
       }
       return false;
+    },
+    toggleAlive: function(){
+      var $element = $(this._elementId);
+      if(this.state === this.STATE_ALIVE){
+        $element.removeClass();
+        this.state = this.STATE_DEAD;
+      } else {
+        $element.addClass('alive');
+        this.state = this.STATE_ALIVE;
+      }
     }
   };
 };
@@ -54,7 +70,7 @@ var GoL = {
    * The speed of fade animations in ms.
    * @type Number
    */
-  _FADE_SPEED: 1500,
+  FADE_SPEED: 1500,
           
   /*
    * Properties.
@@ -78,18 +94,19 @@ var GoL = {
    */
   init: function(){
     var $gridContainer = $('#grid-container');
+    $gridContainer.fadeOut(this.FADE_SPEED);
     //TODO: insert controls, Handlers for buttons and fields
-    this.initGrid(this._DEFAULT_SIZE);
-    $gridContainer.fadeIn(this._FADE_SPEED);
+    this._initGrid(this._DEFAULT_SIZE);
+    $gridContainer.fadeIn(this.FADE_SPEED);
   },
   
   /**
    * Grid initializer function.
    * Clears grid and constructs a new one according to size.
-   * @param Number size
+   * @param {Number} size
    * @returns {undefined}
    */
-  initGrid: function(size){
+  _initGrid: function(size){
     var $grid = $('#grid');
     $grid.html('');
     if(size === undefined || isNaN(size)) {
@@ -97,7 +114,8 @@ var GoL = {
     }
     $grid.width((size * this._CELL_SIZE ) + 'px');
     this._grid = new Array(size);
-    var row, cell, cssClass;
+    var cssClass;
+    var i=0, j=0;
     for(i = 0; i < size; i++){
       this._grid[i] = new Array(size);
       cssClass = i === (size -1) ? "bottom" : "";
@@ -107,11 +125,20 @@ var GoL = {
       }));
       $row = $('#'+i);
       for(j = 0; j < size; j++){
-        this._grid[i][j] = new Cell();
+        // Instantiate the Cell object.
+        this._grid[i][j] = new Cell(j, i);
+        // Determine if the element is the first in the row
         cssClass = j === 0 ? "first " : "";
+        // Insert the td into the tabel in the DOM.
         $row.append($('<td>', {
           id: i + "-" + j,
-          class: cssClass
+          class: cssClass,
+          click: function cellDivClick(event) {
+            event.preventDefault();
+            var pos = this.id.split('-');
+            GoL._grid[pos[0]][pos[1]].toggleAlive();
+            return false;
+          }
           //TODO: add Handler for click events (before simulation)
         }));
       }
@@ -123,4 +150,5 @@ var GoL = {
 
 $(document).ready(function(){
   GoL.init();
+  $('#controls-wrapper').fadeIn(GoL.FADE_SPEED);
 });
