@@ -9,6 +9,14 @@
  * @version 0.0.1
  */
 
+/*
+ * Global constants
+ */
+STATE_DEAD = '';
+STATE_DYING = 'dying';
+STATE_BORN = 'born';
+STATE_ALIVE = 'alive';
+
 /**
  * Cell class.
  * @param {Number} x
@@ -16,24 +24,17 @@
  * @param {Number} y
  *   The y-Position of the cell.
  * @returns object
- *   An object reprensenting a cell on the field.
+ *   An object reprensenting a cell on the grid.
  */
 Cell = function(x, y){
   if(isNaN(parseInt(x)) || isNaN(parseInt(y))) return undefined;
   return {
     /*
-     * -----------------------------------------------------------------------------------------------------------------Constants.
-     */
-    STATE_DEAD: 0,
-    STATE_DYING: 1,
-    STATE_BORN: 2,
-    STATE_ALIVE: 3,
-    /*
      * -----------------------------------------------------------------------------------------------------------------Properties.
      */
     neighbors: new Array(8),
-    aliveNeighbors: 0,
-    state: 0,
+    state: STATE_DEAD,
+    _nextState: STATE_DEAD,
     _elementId: '#' + y + '-' + x,
     /*
      * -----------------------------------------------------------------------------------------------------------------Methods.
@@ -43,7 +44,7 @@ Cell = function(x, y){
      * @returns {Boolean}
      */
     isAlive: function() {
-      if(this.state === this.STATE_ALIVE){
+      if(this.state === STATE_ALIVE || this.state === STATE_BORN){
         return true;
       }
       return false;
@@ -54,13 +55,35 @@ Cell = function(x, y){
      */
     toggleAlive: function(){
       var $element = $(this._elementId);
-      if(this.state === this.STATE_ALIVE){
+      if(this.state === STATE_ALIVE){
         $element.removeClass();
-        this.state = this.STATE_DEAD;
+        this.state = STATE_DEAD;
       } else {
-        $element.addClass('alive');
-        this.state = this.STATE_ALIVE;
+        this.state = STATE_ALIVE;
+        $element.addClass(this.state);
       }
+    },
+    
+    setDead: function() {
+      this._nextState = STATE_DEAD;
+    },
+    
+    setDying: function() {
+      this._nextState = STATE_DYING;
+      $(this._elementId).removeClass().addClass(STATE_DYING);
+    },
+    
+    setBorn: function() {
+      this._nextState = STATE_BORN;
+      $(this._elementId).addClass(STATE_BORN);
+    },
+    
+    setAlive: function() {
+      this._nextState = STATE_ALIVE;
+    },
+            
+    stateTransition: function() {
+      this.state = this._nextState;
     },
     
     setNeighborTopLeft: function(cell) {
@@ -99,6 +122,47 @@ Cell = function(x, y){
 };
 
 /**
+ * The ruleset for Conway's original universe.
+ */
+var ConwayRuleSet = {
+  process: function(cell){
+    if(cell.state === STATE_DYING) {
+      // Let the dying cell die.
+      cell.setDead();
+      return;
+    }
+    if(cell.state === STATE_BORN) {
+      // Let the newly born cell become alive.
+      cell.setAlive();
+      return;
+    }
+    var aliveNeighbors = 0;
+    for(var i = 0; i < cell.neighbors.length; i++) {
+      if(cell.neighbors[i].isAlive() === true) {
+        aliveNeighbors++;
+      }
+    }
+    if(cell.state === STATE_ALIVE) {
+      if(aliveNeighbors === 2 || aliveNeighbors === 3) {
+        // Right count of alive neighbors. The cell stays alive.
+        cell.setAlive();
+        return;
+      }
+      // Too few or too many neighbors. The cell dies.
+      cell.setDying();
+      return;
+    }
+    
+    // The cell is definitely dead, so let's check if it will be born again.
+    if(aliveNeighbors === 3) {
+      cell.setBorn();
+    }
+  }
+};
+
+var RuleSet = ConwayRuleSet;
+
+/**
  * Main class holding all the functions for GoL.
  */
 var GoL = {
@@ -126,7 +190,12 @@ var GoL = {
    * @type String
    */
   _ERROR_MESSAGE_SIZE_TOO_SMALL : "Please specify a size of at least 3.",
-          
+  
+  /*
+   * The error messag for a size that is too big.
+   * @type String
+   */
+  _ERROR_MESSAGE_SIZE_TOO_BIG : "Please specify a size smaller or equal 70.",
   /*
    * -------------------------------------------------------------------------------------------------------------------Properties.
    */
@@ -141,7 +210,9 @@ var GoL = {
     * (occurs when cells switch from "dying" to "dead" or from "born" to "alive").
     * @type Boolean
     */
-   _isComputeStep: false,
+   _isComputeStep: true,
+   
+   _cycleCount: 0,
    /*
     * The error message element for the settings fieldset.
     * @type jQuery
@@ -159,19 +230,28 @@ var GoL = {
    */
   init: function(){
     var $gridContainer = $('#grid-container');
+    // Disable control elements.
+    $('#step-button').attr('disabled', 'disabled');
     // Hide the grid and error messages.
     $gridContainer.fadeOut(this.FADE_SPEED);
-    this._$settingsErrorMessage.fadeOut(this.FADE_SPEED);
+    this._$settingsErrorMessage.hide('slow');
     // Get the size of the grid and initialize it.
     var size = parseInt($('#size-field').val());
     if(isNaN(size)) {
       size = this._DEFAULT_SIZE;
     } else if(size < 3) {
-      this._$settingsErrorMessage.text(this._ERROR_MESSAGE_SIZE_TOO_SMALL).fadeIn(this.FADE_SPEED);
+      this._$settingsErrorMessage.text(this._ERROR_MESSAGE_SIZE_TOO_SMALL).show('slow');
       return false;
-    } 
+    } else if (size > 70) {
+      this._$settingsErrorMessage.text(this._ERROR_MESSAGE_SIZE_TOO_BIG).show('slow');
+      return false;
+    }
     this._initGrid(size);
     $gridContainer.fadeIn(this.FADE_SPEED);
+    // Activate controls again
+    this._cycleCount = 0;
+    $('#cycle-count').val(this._cycleCount);
+    $('#step-button').removeAttr('disabled');
   },
   
   /**
@@ -305,22 +385,53 @@ var GoL = {
         }));
       }
     }
-  }
+  },
   
   //TODO: Simulation function, animation for cycle
+  step: function() {
+    var size = this._grid.length;
+    var i = 0, j = 0;
+      // Compute the next state of every cell according to the rule set.
+      for(i = 0; i < size; i++) {
+        for(j = 0; j < size; j++) {
+          RuleSet.process(this._grid[i][j]);
+        }
+      }
+    if(this._isComputeStep){
+      this._cycleCount++;
+      $('#cycle-count').val(this._cycleCount);
+    } else {
+      // Switch the classes of dying or newly born cells in a bulk call if we aren't in a computing step (performance).
+      $('#grid td.' + STATE_DYING).removeClass();
+      $('#grid td.' + STATE_BORN).removeClass().addClass(STATE_ALIVE);
+    }
+    this._isComputeStep = !this._isComputeStep;
+    
+    // Perform a state transition on every cell object.
+    for(i = 0; i < size; i++) {
+      for(j = 0; j < size; j++) {
+        this._grid[i][j].stateTransition();
+      }
+    }
+  }
 };
 
 $(document).ready(function(){
-//  GoL.init();
   $('#controls-wrapper').fadeIn(GoL.FADE_SPEED);
   // Disable default form behavior.
   $('#control-form').submit(function(event){
     event.preventDefault();
     return false;
   });
+  $('#cycle-count').val('0');
   $('#create-grid-button').click(function(event){
     event.preventDefault();
     GoL.init();
+    return false;
+  });
+  $('#step-button').click(function(event){
+    event.preventDefault();
+    GoL.step();
     return false;
   });
 });
