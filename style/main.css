@@ -17,7 +17,14 @@ h1,h2{margin-bottom:.6em}
 h1{font-size:1.6em;line-height:1.2}
 h2{font-size:1.5em}
 label:after{content: ':'}
+
+.clearfix:before,.clearfix:after{content:" ";display:table}
+.clearfix:after{clear:both}
+.clearfix{*zoom:1}
+.float-left{float: left}
 .text-center{text-align: center}
+.width-full{width:100%}
+.width-half{width:50%}
 /*  */
 #container{background: #fbfbfb; min-width: 1000px; width: 75%; margin: 0 auto; padding: 0 1em 1em; border-radius: 5px}
 
@@ -34,4 +41,7 @@ label:after{content: ':'}
 #grid td.dying{background: #e21f26}
 
 /* Controls form */
+.form-help{margin-top:0;color:#aaa;font-size:.82em;font-style:italic}
+fieldset{margin-bottom:1em;background:#fbfbfb;padding: 0}
 #control-form{width: 50%; margin: 0 auto}
+#control-form p{margin: 0}
