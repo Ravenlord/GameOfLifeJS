@@ -6,7 +6,7 @@
  * @author Markus Deutschl <deutschl.markus@gmail.com>
  * @copyright (c) 2013, Markus Deutschl
  * @license http://www.gnu.org/licenses/agpl.html AGPLv3
- * @version 0.0.1
+ * @version 1.0.0
  */
 /* General styles. */
 html{background:#3f3f3f}
@@ -16,12 +16,15 @@ h1,h2,h3{border-bottom:thin solid #e5e5e5}
 h1,h2{margin-bottom:.6em}
 h1{font-size:1.6em;line-height:1.2}
 h2{font-size:1.5em}
+label{padding: 0 .2em}
 label:after{content: ':'}
+.label-no-colon:after{content: ''}
 
 .margin-auto{margin: auto}
 .clearfix:before,.clearfix:after{content:" ";display:table}
 .clearfix:after{clear:both}
 .clearfix{*zoom:1}
+.clear-both{clear: both}
 .float-left{float: left}
 .text-center{text-align: center}
 .width-full{width:100%}
@@ -44,5 +47,6 @@ label:after{content: ':'}
 /* Controls form */
 .form-help{margin-top:0;color:#aaa;font-size:.82em;font-style:italic}
 fieldset{margin-bottom:1em;background:#fbfbfb;padding: 0}
+.number-field{width: 3em; text-align: right}
 #control-form{width: 50%; margin: 0 auto}
 #control-form p{margin: 0}

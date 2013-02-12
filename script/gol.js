@@ -6,7 +6,7 @@
  * @author Markus Deutschl <deutschl.markus@gmail.com>
  * @copyright (c) 2013, Markus Deutschl
  * @license http://www.gnu.org/licenses/agpl.html AGPLv3
- * @version 0.0.1
+ * @version 1.0.0
  */
 
 /*
@@ -16,6 +16,23 @@ STATE_DEAD = '';
 STATE_DYING = 'dying';
 STATE_BORN = 'born';
 STATE_ALIVE = 'alive';
+
+/*
+ * Flag to determine whether the grid cells are clickable or not.
+ * @type Boolean
+ */
+gridClicksEnabled = true;
+
+/*
+ * The event listener for the simulation interval.
+ * @type @exp;window@call;setInterval
+ */
+var listener;
+/*
+ * Flag to determine whether the simulation is running or not.
+ * @type Boolean
+ */
+var simulationRunning = false;
 
 /**
  * Cell class.
@@ -186,6 +203,11 @@ var GoL = {
    */
   FADE_SPEED: 1500,
   /*
+   * The default simulation speed of the evolution steps in ms.
+   * @type Number
+   */
+  DEFAULT_SIMULATION_SPEED: '250',
+  /*
    * The error message for a size that is too small.
    * @type String
    */
@@ -231,7 +253,12 @@ var GoL = {
   init: function(){
     var $gridContainer = $('#grid-container');
     // Disable control elements.
+    $('#start-button').attr('disabled', 'disabled');
     $('#step-button').attr('disabled', 'disabled');
+    $('#reset-button').attr('disabled', 'disabled');
+    // Clear simulation interval, if there is one.
+    window.clearInterval(listener);
+    simulationRunning = false;
     // Hide the grid and error messages.
     $gridContainer.fadeOut(this.FADE_SPEED);
     this._$settingsErrorMessage.hide('slow');
@@ -251,7 +278,11 @@ var GoL = {
     // Activate controls again
     this._cycleCount = 0;
     $('#cycle-count').val(this._cycleCount);
+    $('#start-button').removeAttr('disabled');
     $('#step-button').removeAttr('disabled');
+    $('#reset-button').removeAttr('disabled');
+    // Set the clickable flag for grid cells.
+    gridClicksEnabled = true;
   },
   
   /**
@@ -387,7 +418,10 @@ var GoL = {
     }
   },
   
-  //TODO: Simulation function, animation for cycle
+  /**
+   * Simulation method for the cell evolution on the grid.
+   * @returns {undefined}
+   */
   step: function() {
     var size = this._grid.length;
     var i = 0, j = 0;
@@ -398,12 +432,13 @@ var GoL = {
           RuleSet.process(this._grid[i][j]);
         }
       }
-      this._cycleCount++;
-      $('#cycle-count').val(this._cycleCount);
     } else {
       // Switch the classes of dying or newly born cells in a bulk call if we aren't in a computing step (performance).
       $('#grid td.' + STATE_DYING).removeClass();
       $('#grid td.' + STATE_BORN).removeClass().addClass(STATE_ALIVE);
+      // Increase the count of completed cycles.
+      this._cycleCount++;
+      $('#cycle-count').val(this._cycleCount);
     }
     this._isComputeStep = !this._isComputeStep;
     
@@ -415,6 +450,11 @@ var GoL = {
     }
   }
 };
+
+function unbindGridClick() {
+  gridClicksEnabled = false;
+  $('#grid td').unbind('click');
+}
 
 $(document).ready(function(){
   $('#controls-wrapper').fadeIn(GoL.FADE_SPEED);
@@ -431,7 +471,32 @@ $(document).ready(function(){
   });
   $('#step-button').click(function(event){
     event.preventDefault();
+    if(gridClicksEnabled === true) unbindGridClick();
     GoL.step();
+    return false;
+  });
+  $('#start-button').click(function(event){
+    event.preventDefault();
+    if(gridClicksEnabled === true) unbindGridClick();
+    // If the simulation isn't running, start it and disable step and reset buttons.
+    if(simulationRunning === false) {
+      var speed = $('#speed-field').val();
+      if(isNaN(parseInt(speed))) {
+        speed = GoL.DEFAULT_SIMULATION_SPEED;
+      }
+      listener = window.setInterval(function(){GoL.step();}, speed);
+      $('#step-button').attr('disabled', 'disabled');
+      $('#reset-button').attr('disabled', 'disabled');
+      $(this).text('Stop');
+      simulationRunning = true;
+    } else {
+      // If it's already running, stop it and enable step and reset buttons again.
+      simulationRunning = false;
+      window.clearInterval(listener);
+      $('#step-button').removeAttr('disabled');
+      $('#reset-button').removeAttr('disabled');
+      $(this).text('Start');
+    }
     return false;
   });
 });

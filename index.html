@@ -20,15 +20,16 @@
         <form id="control-form">
           <fieldset class="clearfix">
             <legend>Settings</legend>
-            <p class="width-half float-left"><label for="torus-checkbox">Torus-like</label><input type="checkbox" checked="checked" id="torus-checkbox"><br><span class="form-help">Sets continuing borders for the grid.</span></p>
-            <p class="width-half float-left"><label for="size-field">Size</label><input placeholder="30" type="number" min="3"  id="size-field"><br><span class="form-help">Sets the width and height of the grid (Allowed: 3-70).</span></p>
+            <p class="width-half float-left"><label for="torus-checkbox"><a href="http://en.wikipedia.org/wiki/Torus">Torus-like</a></label><input type="checkbox" checked="checked" id="torus-checkbox"><br><span class="form-help">Sets continuing borders for the grid.</span></p>
+            <p class="width-half float-left"><label for="size-field">Size</label><input id="size-field" class="number-field" placeholder="30" type="number" min="3"><br><span class="form-help">Sets the width and height of the grid (Allowed: 3-70).</span></p>
             <p><button id="create-grid-button">Create Grid</button><br><span class="form-help">Creates the grid according to your settings.</span></p>
             <p id="settings-error-message" class="message warning" style="display: none"></p>
           </fieldset>
           <fieldset class="clearfix">
             <legend>Controls</legend>
-            <p><button id="step-button" disabled="disabled">Step</button></p>
-            <p><input id="cycle-count" type="number" value="0" disabled="disabled"><br><span class="form-help">Shows the number of cycles which have been simulated.</span></p>
+            <p class="width-half float-left"><label for="speed-field">Speed</label><input id="speed-field" class="number-field" type="number" placeholder="250"><label for="speed-field" class="label-no-colon">ms</label><br><span class="form-help">Specifies the simulation speed in milliseconds.</span></p>
+            <p class="width-half float-left"><button id="start-button" disabled="disabled">Start</button><button id="step-button" disabled="disabled">Step</button><button id="reset-button" disabled="disabled">Reset</button></p>
+            <p class="clear-both"><label for="cycle-count">Cycle</label><input id="cycle-count" class="number-field" type="text" value="0" disabled="disabled"><br><span class="form-help">Shows the number of cycles which have been simulated.</span></p>
           </fieldset>
         </form>
       </div>
