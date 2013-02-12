@@ -83,7 +83,17 @@ Cell = function(x, y){
     },
             
     stateTransition: function() {
-      this.state = this._nextState;
+      switch(this.state) {
+        case STATE_DYING:
+          this.state = STATE_DEAD;
+          break;
+        case STATE_BORN:
+          this.state = STATE_ALIVE;
+          break;
+        default:
+          this.state = this._nextState;
+          break;
+      }
     },
     
     setNeighborTopLeft: function(cell) {
@@ -126,16 +136,6 @@ Cell = function(x, y){
  */
 var ConwayRuleSet = {
   process: function(cell){
-    if(cell.state === STATE_DYING) {
-      // Let the dying cell die.
-      cell.setDead();
-      return;
-    }
-    if(cell.state === STATE_BORN) {
-      // Let the newly born cell become alive.
-      cell.setAlive();
-      return;
-    }
     var aliveNeighbors = 0;
     for(var i = 0; i < cell.neighbors.length; i++) {
       if(cell.neighbors[i].isAlive() === true) {
@@ -391,13 +391,13 @@ var GoL = {
   step: function() {
     var size = this._grid.length;
     var i = 0, j = 0;
+    if(this._isComputeStep){
       // Compute the next state of every cell according to the rule set.
       for(i = 0; i < size; i++) {
         for(j = 0; j < size; j++) {
           RuleSet.process(this._grid[i][j]);
         }
       }
-    if(this._isComputeStep){
       this._cycleCount++;
       $('#cycle-count').val(this._cycleCount);
     } else {

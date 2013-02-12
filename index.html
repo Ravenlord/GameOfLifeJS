@@ -1,39 +1,41 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Conway's Game of Life</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" type="text/css" href="style/main.css">
-        <script type="text/javascript" src="script/jquery-1.9.1.js"></script>
-        <!-- upon completion <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script> -->
-    </head>
-    <body>
-        <div id="container">
-            <h1>Conway's Game of Life in JavaScript</h1>
-            <noscript class="message warning">This website needs JavaScript to run correctly. Please enable it in your browser.</noscript>
-            <p>This is my JavaScript implementation of <a href="http://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's "Game of Life"</a>. It currently features the original version of the game exclusively, but more variations will be added if there is time.</p>
-            <p>If you want to, you can fork me on <a href="https://github.com/Ravenlord" target="_blank">GitHub</a>.</p>
-            <div id="controls-wrapper" class="text-center" style="display: none">
-              <form id="control-form">
-                <fieldset class="clearfix">
-                  <legend>Settings</legend>
-                  <p class="width-half float-left"><label for="torus-checkbox">Torus-like</label><input type="checkbox" checked="checked" id="torus-checkbox"><br><span class="form-help">Sets continuing borders for the grid.</span></p>
-                  <p class="width-half float-left"><label for="size-field">Size</label><input placeholder="30" type="number" min="3"  id="size-field"><br><span class="form-help">Sets the width and height of the grid (Allowed: 3-70).</span></p>
-                  <p><button id="create-grid-button">Create Grid</button><br><span class="form-help">Creates the grid according to your settings.</span></p>
-                  <p id="settings-error-message" class="message warning" style="display: none"></p>
-                </fieldset>
-                <fieldset class="clearfix">
-                  <legend>Controls</legend>
-                  <p><button id="step-button" disabled="disabled">Step</button></p>
-                  <p><input id="cycle-count" type="number" value="0" disabled="disabled"><br><span class="form-help">Shows the number of cycles which have been simulated.</span></p>
-                </fieldset>
-              </form>
-            </div>
-            <div id="grid-container" class="text-center" style="display: none">
-              <table id="grid"></table>
-            </div>
-        </div>
-        <script type="text/javascript" src="script/gol.js"></script>
-    </body>
+  <head>
+    <title>Conway's Game of Life</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="style/main.css">
+    <script type="text/javascript" src="script/jquery-1.9.1.js"></script>
+    <!-- upon completion <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script> -->
+  </head>
+  <body>
+    <div id="container">
+      <div class="width-half margin-auto">
+        <h1>Conway's Game of Life in JavaScript</h1>
+        <noscript class="message warning">This website needs JavaScript to run correctly. Please enable it in your browser.</noscript>
+        <p>This is my JavaScript implementation of <a href="http://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's "Game of Life"</a>. It currently features the original version of the game exclusively, but more variations will be added if there is time.</p>
+        <p>If you want to, you can fork me on <a href="https://github.com/Ravenlord" target="_blank">GitHub</a>.</p>
+      </div>
+      <div id="controls-wrapper" class="text-center" style="display: none">
+        <form id="control-form">
+          <fieldset class="clearfix">
+            <legend>Settings</legend>
+            <p class="width-half float-left"><label for="torus-checkbox">Torus-like</label><input type="checkbox" checked="checked" id="torus-checkbox"><br><span class="form-help">Sets continuing borders for the grid.</span></p>
+            <p class="width-half float-left"><label for="size-field">Size</label><input placeholder="30" type="number" min="3"  id="size-field"><br><span class="form-help">Sets the width and height of the grid (Allowed: 3-70).</span></p>
+            <p><button id="create-grid-button">Create Grid</button><br><span class="form-help">Creates the grid according to your settings.</span></p>
+            <p id="settings-error-message" class="message warning" style="display: none"></p>
+          </fieldset>
+          <fieldset class="clearfix">
+            <legend>Controls</legend>
+            <p><button id="step-button" disabled="disabled">Step</button></p>
+            <p><input id="cycle-count" type="number" value="0" disabled="disabled"><br><span class="form-help">Shows the number of cycles which have been simulated.</span></p>
+          </fieldset>
+        </form>
+      </div>
+      <div id="grid-container" class="text-center" style="display: none">
+        <table id="grid"></table>
+      </div>
+    </div>
+    <script type="text/javascript" src="script/gol.js"></script>
+  </body>
 </html>
