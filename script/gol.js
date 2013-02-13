@@ -499,4 +499,7 @@ $(document).ready(function(){
     }
     return false;
   });
+  $('#reset-button').click(function(){
+    GoL.init();
+  });
 });
